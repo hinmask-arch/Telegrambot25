@@ -98,5 +98,15 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(conv_handler)
 app.add_handler(CommandHandler("list", list_forms))
 
+from flask import Flask, request
+
+flask_app = Flask(__name__)
+
+@flask_app.route("/", methods=["POST"])
+def webhook():
+    update = Update.de_json(request.get_json(force=True), app.bot)
+    app.update_queue.put(update)
+    return "ok"
+
 if __name__ == "__main__":
-    app.run_polling()
+    flask_app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
